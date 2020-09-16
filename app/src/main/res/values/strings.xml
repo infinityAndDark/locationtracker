@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Running Tracker</string>
+    <string name="tracking_notification_title">You are running now</string>
+    <string name="tracking_notification_description">Press here to bring you back!</string>
+    <string name="notification_turn_on_location_service">Please turn on location service!</string>
+    <string name="notification_grant_permission">Please grant all permissions!</string>
+    <string name="activity_still">Still</string>
+    <string name="activity_moving">Moving</string>
+
+</resources>
