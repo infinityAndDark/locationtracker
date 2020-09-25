@@ -221,6 +221,9 @@ class RecordFragment : MyFragment(), OnMapReadyCallback {
                 if (event.isMoving) getString(R.string.activity_moving)
                 else getString(R.string.activity_still)
         }
+        if (event is EventLocationServiceNotAvailable) {
+            notifyTurnOnLocationService()
+        }
     }
 
     private fun updateInfo(session: RunningSession) {

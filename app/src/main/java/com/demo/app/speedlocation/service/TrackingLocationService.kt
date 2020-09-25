@@ -1,9 +1,7 @@
 package com.demo.app.speedlocation.service
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.content.Intent
-import android.util.Log
 import androidx.core.content.ContextCompat
 import com.demo.app.speedlocation.MyApplication
 import com.demo.app.speedlocation.data.RecordHistory
@@ -37,18 +35,16 @@ class TrackingLocationService : MyForegroundService() {
     private lateinit var history: RecordHistory
     private var locationClient: FusedLocationProviderClient? = null
     private var durationJob: Job? = null
-
-    private lateinit var mActivityTransitionsPendingIntent: PendingIntent
-    private lateinit var mTransitionsReceiver: TransitionsReceiver
-    private lateinit var sensorIntent:Intent
+    private lateinit var sensorIntent: Intent
+    private lateinit var activityRecognitionIntent: Intent
 
     private var isMoving = false
 
     override fun onCreate() {
         super.onCreate()
         isRunning = true
-        sensorIntent=Intent(this,SensorService::class.java)
-        initTransitionRecognition()
+        sensorIntent = Intent(this, SensorService::class.java)
+        activityRecognitionIntent = Intent(this, ActivityRecognitionService::class.java)
         prepareData()
         startLocationListener()
     }
@@ -108,7 +104,7 @@ class TrackingLocationService : MyForegroundService() {
             postEvent(EventTrackingLocationRunning(session))
             listenDurationChange()
             locationClient?.requestLocationUpdateWithCallBack(locationCallback)
-            startTrackingActivity(mTransitionsReceiver, mActivityTransitionsPendingIntent)
+            startService(activityRecognitionIntent)
             startService(sensorIntent)
         }
     }
@@ -116,7 +112,7 @@ class TrackingLocationService : MyForegroundService() {
     private fun stopLocationListener() {
         locationClient?.removeLocationUpdates(locationCallback)
         stopListenDurationChange()
-        stopTrackingActivity(mTransitionsReceiver, mActivityTransitionsPendingIntent)
+        stopService(activityRecognitionIntent)
         stopService(sensorIntent)
         isPause = true
     }
@@ -135,10 +131,6 @@ class TrackingLocationService : MyForegroundService() {
 
         override fun onLocationAvailability(p0: LocationAvailability?) {
             super.onLocationAvailability(p0)
-            Log.e(
-                this::class.java.name,
-                "Location:${p0?.isLocationAvailable}"
-            )
             if (p0?.isLocationAvailable == false) {
                 session.lastRoute().stop()
             }
@@ -160,11 +152,6 @@ class TrackingLocationService : MyForegroundService() {
 
     private fun stopListenDurationChange() {
         durationJob?.cancel()
-    }
-
-    private fun initTransitionRecognition() {
-        mActivityTransitionsPendingIntent = makePendingIntent()
-        mTransitionsReceiver = TransitionsReceiver()
     }
 
 }
